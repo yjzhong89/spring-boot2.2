@@ -265,12 +265,28 @@ public class SpringApplication {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SpringApplication(ResourceLoader resourceLoader, Class<?>... primarySources) {
+		// 资源加载器
 		this.resourceLoader = resourceLoader;
 		Assert.notNull(primarySources, "PrimarySources must not be null");
+		// 对primarySources进行去重
 		this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
+		/**
+		 * 对项目类型进行推断，主要包括三类：
+		 * 1. NONE：非web项目
+		 * 2. SERVLET：标准的Servlet web项目(还有非Servlet的web项目？)
+		 * 3. REACTIVE：WEBFLUX(Spring5提供的新特性)
+		 */
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
+		/**
+		 * 在springboot中首次调用了getSpringFactoriesInstances(这个方法很重要)
+		 * setInitializers往这个list中添加数据List<ApplicationContextInitializer<?>>
+		 * 这里是通过获取所有META-INF目录下的spring.factories文件，并获取当中配置的所有的类
+		 * 然后逐一比较看是否满足类型要求
+		 */
 		setInitializers((Collection) getSpringFactoriesInstances(ApplicationContextInitializer.class));
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
+		// 获取启动类，这个获取的方法是通过新建一个异常，然后通过堆栈信息获取到main方法所在的类
+		// 该类就是应用的启动类
 		this.mainApplicationClass = deduceMainApplicationClass();
 	}
 

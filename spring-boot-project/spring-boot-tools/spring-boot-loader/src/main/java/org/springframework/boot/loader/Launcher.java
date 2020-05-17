@@ -47,6 +47,7 @@ public abstract class Launcher {
 	 */
 	protected void launch(String[] args) throws Exception {
 		JarFile.registerUrlProtocolHandler();
+		// 创建LaunchedURLClassLoader，该类是spring-boot自定义的类加载器
 		ClassLoader classLoader = createClassLoader(getClassPathArchives());
 		launch(args, getMainClass(), classLoader);
 	}
@@ -83,6 +84,7 @@ public abstract class Launcher {
 	 * @throws Exception if the launch fails
 	 */
 	protected void launch(String[] args, String mainClass, ClassLoader classLoader) throws Exception {
+		// 修改线程的上下文类加载器为LaunchedURLClassLoader
 		Thread.currentThread().setContextClassLoader(classLoader);
 		createMainMethodRunner(mainClass, args, classLoader).run();
 	}

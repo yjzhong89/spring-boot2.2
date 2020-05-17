@@ -43,8 +43,11 @@ public class MainMethodRunner {
 	}
 
 	public void run() throws Exception {
+		// 取出前面设置的线程上下文类加载器，即LaunchedURLClassLoader
 		Class<?> mainClass = Thread.currentThread().getContextClassLoader().loadClass(this.mainClassName);
 		Method mainMethod = mainClass.getDeclaredMethod("main", String[].class);
+		// 这里的第一个参数是null，这是由于main方法是一个静态方法(静态方法并不属于类，而是属于类所对应的class对象)
+		// 为什么一定是要main方法呢？指定为main方法时，既可以通过jar包的形式运行，也可以通过直接执行main方法运行
 		mainMethod.invoke(null, new Object[] { this.args });
 	}
 

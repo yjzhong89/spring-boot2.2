@@ -56,6 +56,7 @@ public abstract class ExecutableArchiveLauncher extends Launcher {
 		Manifest manifest = this.archive.getManifest();
 		String mainClass = null;
 		if (manifest != null) {
+			// 获取Start-Class属性所对应的值，即应用的启动类
 			mainClass = manifest.getMainAttributes().getValue("Start-Class");
 		}
 		if (mainClass == null) {
@@ -66,7 +67,10 @@ public abstract class ExecutableArchiveLauncher extends Launcher {
 
 	@Override
 	protected List<Archive> getClassPathArchives() throws Exception {
+		// 使用方法引用来判断每一个entry是不是符合条件(BOOT-INF/classes/或者BOOT-INF/lib/)
+		// 最终会将所有的在这两个目录中的文件全部存放到集合中
 		List<Archive> archives = new ArrayList<>(this.archive.getNestedArchives(this::isNestedArchive));
+		// 空壳方法，提供一个扩展点
 		postProcessClassPathArchives(archives);
 		return archives;
 	}
