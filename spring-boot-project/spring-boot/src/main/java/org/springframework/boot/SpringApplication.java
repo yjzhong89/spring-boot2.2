@@ -278,7 +278,7 @@ public class SpringApplication {
 		 */
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
 		/**
-		 * 在springboot中首次调用了getSpringFactoriesInstances(这个方法很重要)
+		 * 在springboot中首次调用了getSpringFactoriesInstances(这个方法非常重要)
 		 * setInitializers往这个list中添加数据List<ApplicationContextInitializer<?>>
 		 * 这里是通过获取所有META-INF目录下的spring.factories文件，并获取当中配置的所有的类
 		 * 然后逐一比较看是否满足类型要求
@@ -437,6 +437,7 @@ public class SpringApplication {
 	}
 
 	private <T> Collection<T> getSpringFactoriesInstances(Class<T> type, Class<?>[] parameterTypes, Object... args) {
+		// 获取类加载器
 		ClassLoader classLoader = getClassLoader();
 		// Use names and ensure unique to protect against duplicates
 		Set<String> names = new LinkedHashSet<>(SpringFactoriesLoader.loadFactoryNames(type, classLoader));
