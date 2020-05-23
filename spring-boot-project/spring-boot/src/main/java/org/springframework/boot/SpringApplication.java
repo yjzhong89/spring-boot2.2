@@ -316,11 +316,21 @@ public class SpringApplication {
 		stopWatch.start();
 		ConfigurableApplicationContext context = null;
 		Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
+		// 由于springboot应用是运行在服务器端，没有界面以及输入输出设备，在Java中称为headless模式
 		configureHeadlessProperty();
+		// 从spring.factories文件中获取到SpringApplicationRunListener
+		// SpringApplicationRunListener负责对SpringApplication的相关事件进行监听
+		// SpringApplicationRunListeners通过使用观察者模式来根据相应的事件触发相应的动作
+		// 默认会获取到一个listener，即EventPublishingRunListener
+		// 当springboot应用在启动的时候，不同的时间点会产生不同的事件，并通过广播的方式将事件通知给监听器
+		// 监听器在接收到事件后根据自己感兴趣的类型来执行相应的逻辑
 		SpringApplicationRunListeners listeners = getRunListeners(args);
 		listeners.starting();
 		try {
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
+			// Environment包括两个方面：profiles以及properties
+			// 其中profiles用于区分系统运行的不同环境(开发环境或者运行环境)，某一时刻只有一个profile是活动状态
+			// properties就是指具体的属性
 			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
 			configureIgnoreBeanInfo(environment);
 			Banner printedBanner = printBanner(environment);
@@ -358,6 +368,7 @@ public class SpringApplication {
 		ConfigurableEnvironment environment = getOrCreateEnvironment();
 		configureEnvironment(environment, applicationArguments.getSourceArgs());
 		ConfigurationPropertySources.attach(environment);
+		// 触发environmentPrepared事件
 		listeners.environmentPrepared(environment);
 		bindToSpringApplication(environment);
 		if (!this.isCustomEnvironment) {
@@ -428,6 +439,7 @@ public class SpringApplication {
 
 	private SpringApplicationRunListeners getRunListeners(String[] args) {
 		Class<?>[] types = new Class<?>[] { SpringApplication.class, String[].class };
+		// 在这里调用的getSpringFactoriesInstances方法中，最后两个参数的类型与types一一对应，即在调用构造方法时需要使用
 		return new SpringApplicationRunListeners(logger,
 				getSpringFactoriesInstances(SpringApplicationRunListener.class, types, this, args));
 	}
@@ -492,10 +504,13 @@ public class SpringApplication {
 	 */
 	protected void configureEnvironment(ConfigurableEnvironment environment, String[] args) {
 		if (this.addConversionService) {
+			// 转换服务，即进行对象的类型转换
 			ConversionService conversionService = ApplicationConversionService.getSharedInstance();
 			environment.setConversionService((ConfigurableConversionService) conversionService);
 		}
+		// 配置属性源，即属性来自哪里
 		configurePropertySources(environment, args);
+		// 配置活动的profile
 		configureProfiles(environment, args);
 	}
 
