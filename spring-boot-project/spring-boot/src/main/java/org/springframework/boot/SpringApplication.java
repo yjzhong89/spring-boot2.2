@@ -334,16 +334,20 @@ public class SpringApplication {
 			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
 			configureIgnoreBeanInfo(environment);
 			Banner printedBanner = printBanner(environment);
+			// 根据webApplicationType来创建，如果是servlet，那么返回AnnotationConfigServletWebServerApplicationContext
 			context = createApplicationContext();
+			// 从spring.factories配置文件中获取异常报告期
 			exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
 					new Class[] { ConfigurableApplicationContext.class }, context);
 			prepareContext(context, environment, listeners, applicationArguments, printedBanner);
+			// 刷新上下文，最终会调用AbstractApplicationContext#refresh方法
 			refreshContext(context);
 			afterRefresh(context, applicationArguments);
 			stopWatch.stop();
 			if (this.logStartupInfo) {
 				new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), stopWatch);
 			}
+			// 调用listeners的started事件方法
 			listeners.started(context);
 			callRunners(context, applicationArguments);
 		}
@@ -353,6 +357,7 @@ public class SpringApplication {
 		}
 
 		try {
+			// 调用listeners的running事件方法
 			listeners.running(context);
 		}
 		catch (Throwable ex) {
@@ -395,6 +400,7 @@ public class SpringApplication {
 		context.setEnvironment(environment);
 		postProcessApplicationContext(context);
 		applyInitializers(context);
+		// 调用listeners的contextPrepared事件方法
 		listeners.contextPrepared(context);
 		if (this.logStartupInfo) {
 			logStartupInfo(context.getParent() == null);
@@ -417,6 +423,7 @@ public class SpringApplication {
 		Set<Object> sources = getAllSources();
 		Assert.notEmpty(sources, "Sources must not be empty");
 		load(context, sources.toArray(new Object[0]));
+		// 调用listeners的contextLoaded事件方法
 		listeners.contextLoaded(context);
 	}
 
