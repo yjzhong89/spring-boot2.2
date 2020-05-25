@@ -340,8 +340,9 @@ public class SpringApplication {
 			exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
 					new Class[] { ConfigurableApplicationContext.class }, context);
 			prepareContext(context, environment, listeners, applicationArguments, printedBanner);
-			// 刷新上下文，最终会调用AbstractApplicationContext#refresh方法
+			// 刷新上下文，最终会调用AbstractApplicationContext#refresh方法(非常重要)
 			refreshContext(context);
+			// 模板方法，默认为空实现
 			afterRefresh(context, applicationArguments);
 			stopWatch.stop();
 			if (this.logStartupInfo) {
@@ -399,6 +400,7 @@ public class SpringApplication {
 			SpringApplicationRunListeners listeners, ApplicationArguments applicationArguments, Banner printedBanner) {
 		context.setEnvironment(environment);
 		postProcessApplicationContext(context);
+		// 执行所有的ApplicationContextInitializer#initialize
 		applyInitializers(context);
 		// 调用listeners的contextPrepared事件方法
 		listeners.contextPrepared(context);
@@ -796,14 +798,18 @@ public class SpringApplication {
 
 	private void callRunners(ApplicationContext context, ApplicationArguments args) {
 		List<Object> runners = new ArrayList<>();
+		// 获取容器中所有的ApplicationRunner的Bean实例
 		runners.addAll(context.getBeansOfType(ApplicationRunner.class).values());
+		// 获取容器中所有的CommandLineRunner的Bean实例
 		runners.addAll(context.getBeansOfType(CommandLineRunner.class).values());
 		AnnotationAwareOrderComparator.sort(runners);
 		for (Object runner : new LinkedHashSet<>(runners)) {
 			if (runner instanceof ApplicationRunner) {
+				// 执行ApplicationRunner的run方法
 				callRunner((ApplicationRunner) runner, args);
 			}
 			if (runner instanceof CommandLineRunner) {
+				// 执行CommandLineRunner的run方法
 				callRunner((CommandLineRunner) runner, args);
 			}
 		}
@@ -1159,6 +1165,7 @@ public class SpringApplication {
 	public Set<Object> getAllSources() {
 		Set<Object> allSources = new LinkedHashSet<>();
 		if (!CollectionUtils.isEmpty(this.primarySources)) {
+			// this.primarySources就是应用的启动类
 			allSources.addAll(this.primarySources);
 		}
 		if (!CollectionUtils.isEmpty(this.sources)) {

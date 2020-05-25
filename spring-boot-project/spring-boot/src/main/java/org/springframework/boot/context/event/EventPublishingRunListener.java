@@ -95,6 +95,7 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 
 	@Override
 	public void started(ConfigurableApplicationContext context) {
+		// 在该方法中执行的是ConfigurableApplicationContext容器的publishEvent方法
 		context.publishEvent(new ApplicationStartedEvent(this.application, this.args, context));
 	}
 
