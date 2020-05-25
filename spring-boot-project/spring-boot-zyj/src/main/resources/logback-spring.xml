@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<configuration>
-	<include resource="org/springframework/boot/logging/logback/base.xml" />
-	<logger name="com.zyj.test" level="ALL"/>
-	<springProfile name="default">
-		<logger name="com.zyj.test" level="INFO"/>
-	</springProfile>
-</configuration>
