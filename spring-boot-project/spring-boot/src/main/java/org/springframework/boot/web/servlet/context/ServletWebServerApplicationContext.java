@@ -150,6 +150,7 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 	protected void onRefresh() {
 		super.onRefresh();
 		try {
+			// 获取嵌入式的Servlet容器工厂，并通过工厂来获取相应的Servlet容器
 			createWebServer();
 		}
 		catch (Throwable ex) {
@@ -176,7 +177,9 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		WebServer webServer = this.webServer;
 		ServletContext servletContext = getServletContext();
 		if (webServer == null && servletContext == null) {
+			// 获取嵌入式Servlet容器工厂
 			ServletWebServerFactory factory = getWebServerFactory();
+			// 根据容器工厂来获取对应的嵌入式Servlet容器
 			this.webServer = factory.getWebServer(getSelfInitializer());
 		}
 		else if (servletContext != null) {

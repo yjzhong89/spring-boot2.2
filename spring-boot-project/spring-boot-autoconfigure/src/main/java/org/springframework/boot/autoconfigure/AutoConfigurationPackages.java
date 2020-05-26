@@ -120,6 +120,7 @@ public abstract class AutoConfigurationPackages {
 
 		@Override
 		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+			// 默认将会注册@SpringBootApplication注解标注的主配置类所在的包为一个GenericBeanDefinition
 			register(registry, new PackageImport(metadata).getPackageName());
 		}
 

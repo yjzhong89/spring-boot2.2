@@ -132,15 +132,22 @@ class BeanDefinitionLoader {
 
 	private int load(Object source) {
 		Assert.notNull(source, "Source must not be null");
+		// 如果是Class类型，通过注解的方式，将启动类注册到beanDefinitionMap中
 		if (source instanceof Class<?>) {
 			return load((Class<?>) source);
 		}
+
+		// 如果是Resource类型，通过xml文件解析注册bean
 		if (source instanceof Resource) {
 			return load((Resource) source);
 		}
+
+		// 如果是Package类型，通过包扫描的方式进行注册
 		if (source instanceof Package) {
 			return load((Package) source);
 		}
+
+		// 如果是字符串类型，那么就先进行反射，然后通过注解的方法进行注册
 		if (source instanceof CharSequence) {
 			return load((CharSequence) source);
 		}
