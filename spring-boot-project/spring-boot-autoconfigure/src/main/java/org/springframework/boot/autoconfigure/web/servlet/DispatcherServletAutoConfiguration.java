@@ -65,8 +65,12 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
 @Configuration(proxyBeanMethods = false)
+// Web应用类型必须为Servlet
 @ConditionalOnWebApplication(type = Type.SERVLET)
+// DispatcherServlet类必须存在于classPath中
 @ConditionalOnClass(DispatcherServlet.class)
+// 该类必须要在ServletWebServerFactoryAutoConfiguration注册后才会注册
+// 因为只有在tomcat启动时才能注入DispatcherServlet
 @AutoConfigureAfter(ServletWebServerFactoryAutoConfiguration.class)
 public class DispatcherServletAutoConfiguration {
 
@@ -86,8 +90,10 @@ public class DispatcherServletAutoConfiguration {
 	@EnableConfigurationProperties({ HttpProperties.class, WebMvcProperties.class })
 	protected static class DispatcherServletConfiguration {
 
+		// Spring容器注册DispatcherServlet
 		@Bean(name = DEFAULT_DISPATCHER_SERVLET_BEAN_NAME)
 		public DispatcherServlet dispatcherServlet(HttpProperties httpProperties, WebMvcProperties webMvcProperties) {
+			// 实例化DispatcherServlet，并设置WebMvcProperties中的一些配置
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
 			dispatcherServlet.setDispatchOptionsRequest(webMvcProperties.isDispatchOptionsRequest());
 			dispatcherServlet.setDispatchTraceRequest(webMvcProperties.isDispatchTraceRequest());
