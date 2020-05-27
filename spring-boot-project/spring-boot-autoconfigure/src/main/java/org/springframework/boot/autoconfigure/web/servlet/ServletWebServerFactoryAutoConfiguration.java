@@ -57,9 +57,21 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
  */
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
+// 仅在类ServletRequest存在于classpath上时才生效
 @ConditionalOnClass(ServletRequest.class)
+// 仅在当前应用是Servlet Web应用时才生效
 @ConditionalOnWebApplication(type = Type.SERVLET)
+// 确保前缀为server的配置参数加载到bean ServerProperties
 @EnableConfigurationProperties(ServerProperties.class)
+/**
+ * 1. 导入ServletWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar来注册
+ * 	  WebServerFactoryCustomizerBeanPostProcessor和ErrorPageRegistrarBeanPostProcessor
+ * 2. 导入EmbeddedTomcat/EmbeddedJetty/EmbeddedUndertow
+ * 	  这三个类属于ServletWebServerFactoryConfiguration的内部类，这三个配置类会分别检测
+ * 	  classpath上存在的类，从而判断当前应用使用的是 Tomcat/Jetty/Undertow,
+ * 	  从而决定定义哪一个ServletWeb服务器的工厂bean，即
+ * 	  TomcatServletWebServerFactory/JettyServletWebServerFactory/UndertowServletWebServerFactory
+ */
 @Import({ ServletWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar.class,
 		ServletWebServerFactoryConfiguration.EmbeddedTomcat.class,
 		ServletWebServerFactoryConfiguration.EmbeddedJetty.class,
@@ -73,6 +85,7 @@ public class ServletWebServerFactoryAutoConfiguration {
 
 	@Bean
 	@ConditionalOnClass(name = "org.apache.catalina.startup.Tomcat")
+	// 针对当前Servlet容器是Tomcat时定义该bean，用于定制化TomcatServletWebServerFactory
 	public TomcatServletWebServerFactoryCustomizer tomcatServletWebServerFactoryCustomizer(
 			ServerProperties serverProperties) {
 		return new TomcatServletWebServerFactoryCustomizer(serverProperties);
@@ -92,6 +105,15 @@ public class ServletWebServerFactoryAutoConfiguration {
 	/**
 	 * Registers a {@link WebServerFactoryCustomizerBeanPostProcessor}. Registered via
 	 * {@link ImportBeanDefinitionRegistrar} for early registration.
+	 * 这是一个ImportBeanDefinitionRegistrar，它会向容器注入两个BeanPostProcessor
+	 * 1. WebServerFactoryCustomizerBeanPostProcessor
+	 * 	  该 BeanPostProcessor 会搜集容器中所有的 WebServerFactoryCustomizer，对当前应用所采用的
+	 * 	  WebServerFactory 被初始化前进行定制
+	 * 2. ErrorPageRegistrarBeanPostProcessor
+	 *	  该BeanPostProcessor会搜集容器中所有的ErrorPageRegistrar，添加到当前应用所采用的
+	 *	  ErrorPageRegistry中。实际上，这里的ErrorPageRegistry会是ConfigurableWebServerFactory,
+	 *	  具体实现上来讲，是一个ConfigurableTomcatWebServerFactory、ConfigurableJettyWebServerFactory
+	 *	  或者ConfigurableUndertowWebServerFactory，分别对应Tomcat，Jetty，Undertow这三种Servlet Web容器的工厂类
 	 */
 	public static class BeanPostProcessorsRegistrar implements ImportBeanDefinitionRegistrar, BeanFactoryAware {
 
