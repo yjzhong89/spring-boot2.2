@@ -124,6 +124,9 @@ public class DispatcherServletAutoConfiguration {
 		@ConditionalOnBean(value = DispatcherServlet.class, name = DEFAULT_DISPATCHER_SERVLET_BEAN_NAME)
 		public DispatcherServletRegistrationBean dispatcherServletRegistration(DispatcherServlet dispatcherServlet,
 				WebMvcProperties webMvcProperties, ObjectProvider<MultipartConfigElement> multipartConfig) {
+			// 使用DispatcherServlet和server配置中的servletPath路径构造ServletRegistrationBean
+			// ServletRegistrationBean实现了ServletContextInitializer接口，在onStartup方法中将对应的Servlet注册到Servlet容器中
+			// 所以这里DispatcherServlet会被注册到Servlet容器中，对应的urlMapping为server.servletPath配置
 			DispatcherServletRegistrationBean registration = new DispatcherServletRegistrationBean(dispatcherServlet,
 					webMvcProperties.getServlet().getPath());
 			registration.setName(DEFAULT_DISPATCHER_SERVLET_BEAN_NAME);
