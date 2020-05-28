@@ -44,6 +44,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @since 1.0.0
  */
 @Configuration(proxyBeanMethods = false)
+// 在classpath中需要同时存在JdbcTemplate以及PlatformTransactionManager时才会被注册
 @ConditionalOnClass({ JdbcTemplate.class, PlatformTransactionManager.class })
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 @EnableConfigurationProperties(DataSourceProperties.class)
@@ -54,6 +55,7 @@ public class DataSourceTransactionManagerAutoConfiguration {
 	static class DataSourceTransactionManagerConfiguration {
 
 		@Bean
+		// 只有当Spring容器中不存在PlatformTransactionManager类型的bean时才会被注册
 		@ConditionalOnMissingBean(PlatformTransactionManager.class)
 		DataSourceTransactionManager transactionManager(DataSource dataSource,
 				ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
