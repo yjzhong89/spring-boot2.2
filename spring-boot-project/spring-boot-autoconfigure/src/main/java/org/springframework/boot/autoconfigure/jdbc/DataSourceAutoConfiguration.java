@@ -52,12 +52,15 @@ import org.springframework.util.StringUtils;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ DataSource.class, EmbeddedDatabaseType.class })
+// spring会注册DataSourceProperties类，并使用配置文件中的值进行属性填充
 @EnableConfigurationProperties(DataSourceProperties.class)
 @Import({ DataSourcePoolMetadataProvidersConfiguration.class, DataSourceInitializationConfiguration.class })
 public class DataSourceAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
+	// 判断是否引入了内置数据库，例如：H2，DERBY，HSQL
 	@Conditional(EmbeddedDatabaseCondition.class)
+	// 没有DataSource/XADataSource对应的BeanDefinition
 	@ConditionalOnMissingBean({ DataSource.class, XADataSource.class })
 	@Import(EmbeddedDataSourceConfiguration.class)
 	protected static class EmbeddedDatabaseConfiguration {
@@ -65,7 +68,10 @@ public class DataSourceAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
+	// 判断是否引入依赖的数据源：HikariDataSource、tomcat.jdbc.pool.DataSource、BasicDataSource
 	@Conditional(PooledDataSourceCondition.class)
+	// 如果没有DataSource/XADataSource对应的BeanDefinition，就通过以下属性的配置文件，配置数据源
+	// 配置数据源的时候，如果没有指定一些数据库的参数，就会报错哦
 	@ConditionalOnMissingBean({ DataSource.class, XADataSource.class })
 	@Import({ DataSourceConfiguration.Hikari.class, DataSourceConfiguration.Tomcat.class,
 			DataSourceConfiguration.Dbcp2.class, DataSourceConfiguration.Generic.class,
